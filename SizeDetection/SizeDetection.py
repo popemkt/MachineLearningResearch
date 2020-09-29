@@ -14,7 +14,7 @@ def midpoint(ptA, ptB):
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--image", required=False,
-                help="path to the input image", default="F:/Capstone/Playground/SizeDetection/img/14.jpg")
+                help="path to the input image", default="F:/Capstone/Playground/SizeDetection/img/1.jpg")
 ap.add_argument("-w", "--width", type=float, required=False, nargs="?",
                 help="width of the left-most object in the image (in inches)", default=1.0)
 args = vars(ap.parse_args())
@@ -22,7 +22,7 @@ args = vars(ap.parse_args())
 ##### Fine tuning #####
 
 alpha = 1.0  # contrast control
-beta = -100    # brightness control
+beta = 0    # brightness control
 threshold1 = 40  # canny control
 threshold2 = 100  # canny control
 kernel = np.ones((5, 5), np.uint8)  # init
@@ -42,11 +42,11 @@ cv2.imshow("Contrasted", enhanced)
 edged = cv2.Canny(enhanced, threshold1, threshold2)
 edged = cv2.dilate(edged, None, iterations=1)
 edged = cv2.erode(edged, None, iterations=1)
-edged = cv2.dilate(edged, None, iterations=1)
-edged = cv2.erode(edged, None, iterations=1)
-edged = cv2.dilate(edged, None, iterations=1)
-edged = cv2.erode(edged, None, iterations=1)
-edged = cv2.dilate(edged, None, iterations=1)
+# edged = cv2.dilate(edged, None, iterations=1)
+# edged = cv2.erode(edged, None, iterations=1)
+# edged = cv2.dilate(edged, None, iterations=1)
+# edged = cv2.erode(edged, None, iterations=1)
+# edged = cv2.dilate(edged, None, iterations=1)
 
 cv2.imshow("Edged", edged)
 # find contours in the edge map
@@ -68,18 +68,18 @@ for c in cnts[:2]:
     # in top-left, top-right, bottom-right, and bottom-left
     # order, then draw the outline of the rotated bounding
     # box
-    # box = perspective.order_points(box)
+    box = perspective.order_points(box)
     cv2.drawContours(orig, [box.astype("int")], -1, (0, 255, 0), 2)
     # unpack the ordered bounding box, then compute the midpoint
     # between the top-left and top-right coordinates, followed by
     # the midpoint between bottom-left and bottom-right coordinates
-    # (tl, tr, br, bl) = box
-    # (tltrX, tltrY) = midpoint(tl, tr)
-    # (blbrX, blbrY) = midpoint(bl, br)
+    (tl, tr, br, bl) = box
+    (tltrX, tltrY) = midpoint(tl, tr)
+    (blbrX, blbrY) = midpoint(bl, br)
     # # # compute the midpoint between the top-left and top-right points,
     # # # followed by the midpoint between the top-righ and bottom-right
-    # (tlblX, tlblY) = midpoint(tl, bl)
-    # (trbrX, trbrY) = midpoint(tr, br)
+    (tlblX, tlblY) = midpoint(tl, bl)
+    (trbrX, trbrY) = midpoint(tr, br)
     # # # draw the midpoints on the image
     # # cv2.circle(orig, (int(tltrX), int(tltrY)), 5, (255, 0, 0), -1)
     # # cv2.circle(orig, (int(blbrX), int(blbrY)), 5, (255, 0, 0), -1)
@@ -91,23 +91,23 @@ for c in cnts[:2]:
     # # cv2.line(orig, (int(tlblX), int(tlblY)), (int(trbrX), int(trbrY)),
     # #          (255, 0, 255), 2)
     # # # compute the Euclidean distance between the midpoints
-    # dA = dist.euclidean((tltrX, tltrY), (blbrX, blbrY))
-    # dB = dist.euclidean((tlblX, tlblY), (trbrX, trbrY))
+    dA = dist.euclidean((tltrX, tltrY), (blbrX, blbrY))
+    dB = dist.euclidean((tlblX, tlblY), (trbrX, trbrY))
     # # if the pixels per metric has not been initialized, then
     # # compute it as the ratio of pixels to supplied metric
     # # (in this case, inches)
     # # if pixelsPerMetric is None:
     # #     pixelsPerMetric = dB / args["width"]
     # # compute the size of the object
-    # dimA = dA
-    # dimB = dB
+    dimA = dA
+    dimB = dB
     # # draw the object sizes on the image
-    # cv2.putText(orig, "{:.1f}px".format(dimA),
-    #             (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX,
-    #             0.65, (255, 255, 255), 2)
-    # cv2.putText(orig, "{:.1f}px".format(dimB),
-    #             (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX,
-    #             0.65, (255, 255, 255), 2)
+    cv2.putText(orig, "{:.1f}px".format(dimA),
+                (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX,
+                0.65, (255, 255, 0), 2)
+    cv2.putText(orig, "{:.1f}px".format(dimB),
+                (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX,
+                0.65, (255, 255, 0), 2)
     # show the output image
 cv2.imshow('Output', imutils.resize(orig, height=1080))
 cv2.waitKey(0)
